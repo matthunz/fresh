@@ -1,0 +1,8 @@
+[package]
+name = "fresh"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+description = "Function reactive programming (FRP)"
+
+[dependencies]
