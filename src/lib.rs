@@ -1,14 +1,35 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
+pub trait Signal {
+    type Item<'a>
+    where
+        Self: 'a;
+
+    fn next(&mut self) -> Self::Item<'_>;
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub fn hold<S, E>(signal: S, event: E) -> Hold<S, E>
+where
+    for<'a> S: 'a + Signal<Item<'a> = Option<E>>,
+{
+    Hold { signal, event }
+}
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+pub struct Hold<S, E> {
+    signal: S,
+    event: E,
+}
+
+impl<S, E> Signal for Hold<S, E>
+where
+    for<'a> S: 'a + Signal<Item<'a> = Option<E>>,
+{
+    type Item<'a> = &'a E
+    where
+        Self: 'a;
+
+    fn next(&mut self) -> Self::Item<'_> {
+        if let Some(event) = self.signal.next() {
+            self.event = event;
+        }
+        &self.event
     }
 }
